@@ -12,7 +12,7 @@ void distVect(){
     int total = 0;
 
 
-    std::ifstream archivo("ejemplo.txt");
+    std::ifstream archivo("input.txt");
     if(!archivo.is_open()){
     	throw std::runtime_error("No se puede abrir el fichero");
 	}
@@ -61,8 +61,8 @@ void distVect(){
 
     }
     
-    std::cout << total << std::endl;
-    
+    std::cout << "La diferencia es: " << total << std::endl;
+
     archivo.close();
 
 }
