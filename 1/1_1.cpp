@@ -5,13 +5,51 @@
 #include <vector>
 #include <stdexcept>
 
+// DyV
+
+int total = 0;
+
+int particion(std::vector<int>& A, int ini, int fin);
+
+ void quickSort(std::vector<int>& A, int ini, int fin){
+	if (ini < fin){
+		int pivote = particion(A, ini, fin);
+		quickSort(A, ini, pivote-1);
+		quickSort(A, pivote+1, fin);
+	}
+}
+
+int particion(std::vector<int>& A, int ini, int fin){
+    int i = ini;
+	for(int j = ini; j <= fin-1; j++){
+		if(A[j] <= A[fin]){
+			// Intercambiamos A[i] con A[j]
+			std::swap(A[i], A[j]);
+			// Avanzamos i
+			i++;
+		}
+	}
+	// Tras llegar al último elemento del array, intercambiamos el pivote(A[fin]) con nuestro A[i]
+	std::swap(A[i], A[fin]);
+	// Como en A[i] tengo mi pivote, devuelvo la posición i 
+	return i;
+}
+
+void printVect(std::vector<int>& A, std::vector<int>& B){
+    for(int i = 0; i < A.size() && i < B.size(); i++){
+        std::cout << A[i];
+        std::cout << "    ";
+        std::cout << B[i] << std::endl;
+    }
+    std::cout << std::endl;
+}
+
 void distVect(){
     // Variables y estructuras de datos a usar
     std::vector<int> n1, n2;
     std::string linea;
-    int total = 0;
 
-
+    // Abrir el fichero
     std::ifstream archivo("input.txt");
     if(!archivo.is_open()){
     	throw std::runtime_error("No se puede abrir el fichero");
@@ -30,35 +68,19 @@ void distVect(){
         n2.push_back(numero2);
     }
 
-    // Mostrar los vectores
-    for(int i = 0; i < n1.size() && i < n2.size(); i++){
-        std::cout << n1[i];
-        std::cout << "    ";
-        std::cout << n2[i] << std::endl;
-    }
+    // Imprimir los vectores
+    printVect(n1, n2);
+
     std::cout << std::endl;
-    // Ordenar el vector n1 y n2
-    for(int i = 0; (i < n1.size()) && (i < n2.size()); i++){
-        int posmin1 = i;
-        int posmin2 = i;
-        for(int j = i+1; (j < n1.size()) && (j < n2.size()); j++){
-            if(n1[j] < n1[posmin1]){
-                posmin1 = j;
-            }
-            if(n2[j] < n2[posmin2]){
-                posmin2 = j;
-            }
-        }
-        if(posmin1 != i){
-            std::swap(n1[i], n1[posmin1]);
-        }
-        if(posmin2 != i){
-            std::swap(n2[i], n2[posmin2]);
-        }
-        std::cout << n1[i] << "    " << n2[i] << std::endl;
+    // Ordenar el vector n1 y n2 con selection sort 
+    quickSort(n1, 0, n1.size()-1);	
+    quickSort(n2, 0, n2.size()-1);	
 
+    // Imprimir los vectores ordenados
+    printVect(n1, n2);
+
+    for(int i = 0; i < n1.size() && i < n2.size(); i++){
         total += abs(n1[i] - n2[i]);
-
     }
     
     std::cout << "La diferencia es: " << total << std::endl;
