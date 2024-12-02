@@ -9,6 +9,8 @@ void distVect(){
     // Variables y estructuras de datos a usar
     std::vector<int> n1, n2;
     std::string linea;
+    int total = 0;
+
 
     std::ifstream archivo("ejemplo.txt");
     if(!archivo.is_open()){
@@ -55,10 +57,12 @@ void distVect(){
         }
         std::cout << n1[i] << "    " << n2[i] << std::endl;
 
-        
+        total += abs(n1[i] - n2[i]);
 
     }
-
+    
+    std::cout << total << std::endl;
+    
     archivo.close();
 
 }
