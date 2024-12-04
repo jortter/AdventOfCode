@@ -18,6 +18,7 @@ void imprimirVector(std::vector<int>& A){
 void numReportsSafe(){
 
 	std::vector<int> report;
+	std::vector<int> report_copia;
 	std::string linea;
 	int report_safe = 0;
 	bool es_valido = true;
@@ -44,14 +45,21 @@ void numReportsSafe(){
 
 		// Solo reseteamos la variable booleana y NO el contador porque sino estaríamos incrementando en uno éste y poniendolo a 0 en cada itercación del bucle while
 		es_valido = true;
+		// Ahora lo que hay que hacer es crearme una copia del vector report (como std::vector<int> report2 = report) e ir eliminando los niveles en la copia
+		// viendo cuál de las eliminaciones hace que mi report sea safe.
 		for(int i = 0; i < report.size()-1; i++){
-			// Tengo que comparar si estoy subiendo en mi posicion actual con que si ya he subido antes en el vector
-			if(!((((report[1] > report[0]) && (report[i+1] > report[i])) || ((report[1] < report[0]) && (report[i+1] < report[i]))) &&
-			(((std::abs(report[i]-report[i+1])) >= 1) && ((std::abs(report[i]-report[i+1])) <= 3)))){
+			report_copia = report;
+			for(int j = 0; j < report_copia.size()-1; j++){
+				report_copia.erase(report_copia.begin(), report_copia.end());
+				// Tengo que comparar si estoy subiendo en mi posicion actual con que si ya he subido antes en el vector
+				if(!((((report_copia[1] > report_copia[0]) && (report_copia[j+1] > report_copia[j])) || ((report_copia[1] < report_copia[0]) &&
+				(report_copia[j+1] < report_copia[j])))&&(((std::abs(report_copia[j]-report_copia[j+1])) >= 1) && ((std::abs(report_copia[j]-report_copia[j+1])) <= 3)))){
 				// Debemos incrementar el contador por cada report válido, no por cada par válido
-				es_valido = false;
+					es_valido = false;
+				}
+
 			}
-			
+					
 		}
 		if(es_valido == true){
 			report_safe++;
@@ -74,3 +82,4 @@ int main(){
 
 	return 0;
 }
+

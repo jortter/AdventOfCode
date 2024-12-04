@@ -42,6 +42,7 @@ void distVect(){
     for(int i = 0; i < n1.size(); i++){
 		repetido = false;
 		contador = 0;
+		// Esta parte se puede resolver usando una tabla hash, en la cual mi key seria cada numero del vector n1 y mi value sería el contador asociado a dicho numero de n1
 		// Comprobar si el elemento de n1 en el que estamos ahora es repetido (si lo es nos salimos del bucle)
 		for(int k = 0; k < i; k++){
 			if(n1[i] == n1[k] && repetido == false){
