@@ -15,13 +15,13 @@ void imprimirVector(std::vector<int>& A){
 	std::cout << std::endl;
 }
 
-void imprimirMatriz(int** M, int filas, int columnas){
-	for(int i = 0; i < filas; i++){
-		for(int j = 0; j < columnas; j++){
-			std::cout << M[i][j] << " ";
-		}
-		std::cout << std::endl;
-	}
+void imprimirMatriz(std::vector<std::vector<int>>& M) {
+    for (int i = 0; i < M.size(); i++) {
+        for (int j = 0; j < M[i].size(); j++) {
+            std::cout << M[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
 }
 
 // Esto NO puede ser una función recursiva porque solo queremos que me divida el numero 1 sola vez en dos partes 
@@ -53,34 +53,38 @@ std::vector<int> obtenerDigitos(int numero){
 }
 
 // Función recursiva que me calcula el número de piedras que hay en el vector piedras tras pestañear 25 veces
-int numeroPiedras(int num_piedras, int pestanyeos, std::vector<int>& A, int ini, int fin, int** M){
+int numeroPiedras(int num_piedras, int pestanyeos, std::vector<int>& A, int ini, int fin, std::vector<std::vector<int>>& M, std::vector<std::vector<bool>>& visitados){
 	
-	// Imprimimos la matriz de memoria para ver cómo se va actualizando en cada llamada recursiva
-	imprimirMatriz(M, pestanyeos+1, num_piedras+1);
 	// CASOS BASE -> Aquel en el que el numero de piedras no aumenta, i.e. solo el caso en el que reemplazamos una piedra con un numero por otra con otro numero
-	//imprimirMatriz(M, pestanyeos+1, num_piedras+1);
 	// En cuanto hemos hecho 25 pestañeos, devolvemos el número de piedras, y ésto es lo que se almacena en prinicipal() al llamar a numeroPiedras()
-	if(pestanyeos == 0){
-		 M[pestanyeos][num_piedras] = num_piedras;
-		 return num_piedras;
-	}
 	// Si ya hemos calculado el número de piedras para un número de pestañeos y un número de piedras, devolvemos el valor almacenado en la matriz
-	if(M[pestanyeos][num_piedras] != -1){
-		return M[pestanyeos][num_piedras];
+	if(visitados[pestanyeos][A.size()]){
+		return M[pestanyeos][A.size()];
 	}
+	
+	if(pestanyeos == 0){
+		M[pestanyeos][A.size()] = A.size();
+		visitados[pestanyeos][A.size()] = true;
+		return A.size();	
+	}
+
 	// Cuando acabamos recorremos el vector, lo reiniciamos para que vuelva a comprobar los casos recursivos para los vectores sucesivos y sumamos 1 al número de pestañeos
 	// (en este caso restamos 1 porque empezamos en 25 pestañeos y vamos decreciendo hasta llegar a 0)
 	if(ini > fin){
 		std::cout << "Vector de piedras tras hacer un pestañeo: " << std::endl;
 		imprimirVector(A);
 		std::cout << "He completado 1 pestañeo, luego reinciamos el vector" << std::endl;
-		M[pestanyeos][num_piedras] = numeroPiedras(num_piedras, pestanyeos-1, A, 0, A.size()-1, M);
+		M[pestanyeos][A.size()] = numeroPiedras(A.size(), pestanyeos-1, A, 0, A.size()-1, M, visitados);
+		visitados[pestanyeos][A.size()] = true;
+		return M[pestanyeos][A.size()];
 	}
 	
 	// Si el numero de la piedra es 0, reemplazamos el 0 por un 1 y avanzamos en el vector para analizar las siguientes piedras
 	if(A[ini] == 0){
 		A[ini] = 1;
-	    M[pestanyeos][num_piedras] = numeroPiedras(num_piedras, pestanyeos, A, ini+1, fin, M);
+	    M[pestanyeos][A.size()] = numeroPiedras(A.size(), pestanyeos, A, ini+1, fin, M, visitados);
+		visitados[pestanyeos][A.size()] = true;
+		return M[pestanyeos][A.size()];
 	}
 
 	// CASOS RECURSIVOS-> Aquel en el que sí tenemos que dividir una piedra en 2 y por tanto aumenta el numero de piedras, cambiando así nuestro vector
@@ -103,16 +107,31 @@ int numeroPiedras(int num_piedras, int pestanyeos, std::vector<int>& A, int ini,
 		// Tenemos que insertar la parte de la derecha en el vector de piedras, justo después de la piedra que acabamos de dividir
 		A.insert(A.begin() + ini + 1, derecha);
 		imprimirVector(A);
+		// Si el número de piedras supera el tamaño de la matriz, tenemos que redimensionar las 2 matrices
+		if (A.size() >= M[0].size()) {
+    		for (auto& fila : M) {
+        		fila.resize(A.size() + 1, -1); // Ajusta el tamaño y rellena con -1
+    		}
+    		for (auto& fila : visitados) {
+        		fila.resize(A.size() + 1, false); // Ajusta el tamaño y rellena con false
+   			 }
+		}
 		// Al insertar una nueva piedra, hay que actualizar los índices del vector e incrementar el número de piedras	
-		M[pestanyeos][num_piedras] = numeroPiedras(num_piedras+1, pestanyeos, A, ini+2, A.size()-1, M);
+		M[pestanyeos][A.size()] = numeroPiedras(A.size()+1, pestanyeos, A, ini+2, A.size()-1, M, visitados);
+		visitados[pestanyeos][A.size()] = true;
+		std::cout << "Matriz de memoria tras 1 pestañeo: " << std::endl;
+		imprimirMatriz(M);
+		return M[pestanyeos][A.size()];
 	} else{
 		// Si NO se cumple ni el caso base ni el caso recursivo, multiplicamos el numero de la piedra por 2024 y seguimos viendo los siguientes números
 		std::cout << "No se cumple ninguno de los 2 casos, luego hacemos: " << A[ini] << " * 2024: " << A[ini] * 2024 << std::endl;
 		A[ini] *= 2024;
 		imprimirVector(A);
-		M[pestanyeos][num_piedras] = numeroPiedras(num_piedras, pestanyeos, A, ini+1, fin, M);	
+		M[pestanyeos][A.size()] = numeroPiedras(A.size(), pestanyeos, A, ini+1, fin, M, visitados);
+		visitados[pestanyeos][A.size()] = true;
+		return M[pestanyeos][A.size()];
 	}
-	return M[pestanyeos][num_piedras];
+
 }
 void principal(){
 
@@ -134,32 +153,21 @@ void principal(){
 		}
 		
 	}
-	
+	archivo.close();
 	std::cout << "Vector de piedras inicial: " << std::endl;
 	imprimirVector(piedras);
 
 	// Tenemos que llamar a la función recursiva que me de el número de piedras al hacer 25 pestañeos
-	int num_blinking = 1;
-	// Mi función de memoria o matriz de memoria será de (num_blinking+1)filas x (piedras.size()+1)columnas 
-	int** M = new int*[num_blinking+1];
-	// Reservamos memoria para las columnas e inicializamos la matriz a -1 usando std::fill(inicio, fin, valor)
-	for(int i = 0; i <= num_blinking; i++){	
-		M[i] = new int[piedras.size()+1];		// Los +1 en v.size() y en cantidad es porque la matriz va de 0 a n (8) y de 0 a v.size() (3)
-		std::fill(M[i], M[i] + piedras.size()+1, -1);
-	}
+	int num_blinking = 10;
+	// Mi función de memoria o matriz de memoria será de (num_blinking+1)filas x (piedras.size()+1)columnas y la inicializamos al tamaño del vector de piedras
+	std::vector<std::vector<int>> M(num_blinking+1, std::vector<int>(piedras.size()+1, -1));
+	// Me creo una matriz booleana que me indique si he tocado una posición de la matriz de memoria y la inicializo a false
+	std::vector<std::vector<bool>> visitados(num_blinking+1, std::vector<bool>(piedras.size()+1, false));
 	std::cout << "Matriz de memoria inicial: " << std::endl;
-	imprimirMatriz(M, num_blinking+1, piedras.size()+1);
-
+	imprimirMatriz(M);
 	// El numero de piedras es el tamaño del vector, el cual va incrementandose en la función recursiva
-	int numero_piedras_totales = numeroPiedras(piedras.size(), num_blinking, piedras, 0, piedras.size()-1, M);
+	int numero_piedras_totales = numeroPiedras(piedras.size(), num_blinking, piedras, 0, piedras.size()-1, M, visitados);
 	std::cout << "Número de piedras totales: " << numero_piedras_totales << std::endl;
-	// Debemos liberar la memoria -> HACER ESTO SIEMPRE A NO SER QUE USEMOS PUNTEROS INTELIGENTES
-	for(int i = 0; i <= num_blinking; i++){
-		// Liberamos las filas
-		delete[] M[i];
-	}
-	// Liberamos las columnas (lo que sobra)
-	delete[] M;
 
 }
 
